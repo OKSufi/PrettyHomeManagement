@@ -26,9 +26,11 @@
 </head>
 <body>
   <div id="app" class="min-h-screen bg-gradient-to-br from-rose-50 via-white to-sky-50"></div>
+  <div id="modal-overlay" class="hidden fixed inset-0 bg-black/30 z-50 flex items-center justify-center p-4"></div>
 
   <script>
     const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const STORAGE_KEY = 'homemaking-routine';
 
     const dailyTasks = [
       { label: 'Make bed', emoji: '🛏️' },
@@ -132,43 +134,73 @@
       purple: {
         bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700',
         accent: 'bg-purple-500', tab: 'bg-purple-500 text-white', bar: 'bg-purple-400',
-        accentHex: '#a855f7',
       },
       rose: {
         bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-700',
         accent: 'bg-rose-500', tab: 'bg-rose-500 text-white', bar: 'bg-rose-400',
-        accentHex: '#f43f5e',
       },
       amber: {
         bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700',
         accent: 'bg-amber-500', tab: 'bg-amber-500 text-white', bar: 'bg-amber-400',
-        accentHex: '#f59e0b',
       },
       sky: {
         bg: 'bg-sky-50', border: 'border-sky-200', text: 'text-sky-700',
         accent: 'bg-sky-500', tab: 'bg-sky-500 text-white', bar: 'bg-sky-400',
-        accentHex: '#0ea5e9',
       },
       teal: {
         bg: 'bg-teal-50', border: 'border-teal-200', text: 'text-teal-700',
         accent: 'bg-teal-500', tab: 'bg-teal-500 text-white', bar: 'bg-teal-400',
-        accentHex: '#14b8a6',
       },
       indigo: {
         bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-700',
         accent: 'bg-indigo-500', tab: 'bg-indigo-500 text-white', bar: 'bg-indigo-400',
-        accentHex: '#6366f1',
       },
       green: {
         bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700',
         accent: 'bg-green-500', tab: 'bg-green-500 text-white', bar: 'bg-green-400',
-        accentHex: '#22c55e',
       },
     };
 
+    /* ---- Week key: ISO week start (Monday), so the whole week shares one key ---- */
+    function getWeekKey() {
+      const now = new Date();
+      const day = now.getDay(); // 0=Sun
+      const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Monday
+      const monday = new Date(now.getFullYear(), now.getMonth(), diff);
+      return `${monday.getFullYear()}-${String(monday.getMonth()+1).padStart(2,'0')}-${String(monday.getDate()).padStart(2,'0')}`;
+    }
+
+    /* ---- Persistence ---- */
+    function loadChecked() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return {};
+        const data = JSON.parse(raw);
+        if (data.weekKey !== getWeekKey()) {
+          // New week — start fresh
+          localStorage.removeItem(STORAGE_KEY);
+          return {};
+        }
+        return data.checked || {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function saveChecked() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          weekKey: getWeekKey(),
+          checked: checked,
+        }));
+      } catch (e) {
+        // silently fail
+      }
+    }
+
     let selectedDay = DAYS[new Date().getDay()];
     const today = selectedDay;
-    let checked = {};
+    let checked = loadChecked();
 
     function getAllTasks(day) {
       const data = schedule[day];
@@ -178,12 +210,52 @@
     function toggleCheck(day, index) {
       const key = `${day}-${index}`;
       checked[key] = !checked[key];
+      saveChecked();
       render();
     }
 
     function selectDay(day) {
       selectedDay = day;
       render();
+    }
+
+    function confirmResetDay(day) {
+      const overlay = document.getElementById('modal-overlay');
+      const colors = colorMap[schedule[day].color];
+      overlay.innerHTML = `
+        <div class="bg-white rounded-2xl shadow-xl p-6 max-w-xs w-full text-center pop-in">
+          <p class="text-lg font-bold text-gray-800 mb-1">Reset ${day}?</p>
+          <p class="text-sm text-gray-500 mb-5">This will uncheck all tasks for ${day}.</p>
+          <div class="flex gap-3">
+            <button onclick="closeModal()"
+              class="flex-1 py-2 rounded-xl border border-gray-200 text-sm font-semibold text-gray-500 hover:bg-gray-50">
+              Cancel
+            </button>
+            <button onclick="resetDay('${day}')"
+              class="flex-1 py-2 rounded-xl text-sm font-semibold text-white ${colors.accent} hover:opacity-90">
+              Reset
+            </button>
+          </div>
+        </div>
+      `;
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+    }
+
+    function resetDay(day) {
+      const allTasks = getAllTasks(day);
+      allTasks.forEach((_, i) => {
+        delete checked[`${day}-${i}`];
+      });
+      saveChecked();
+      closeModal();
+      render();
+    }
+
+    function closeModal() {
+      const overlay = document.getElementById('modal-overlay');
+      overlay.classList.add('hidden');
+      overlay.classList.remove('flex');
     }
 
     function createCheckSVG() {
@@ -259,6 +331,13 @@
         </div>
       ` : '';
 
+      const resetBtnHTML = completedCount > 0 ? `
+        <button onclick="confirmResetDay('${selectedDay}')"
+          class="text-xs text-gray-400 hover:text-gray-600 transition-colors font-medium">
+          ↺ Reset day
+        </button>
+      ` : '';
+
       document.getElementById('app').innerHTML = `
         <header class="bg-white shadow-sm border-b border-rose-100">
           <div class="max-w-2xl mx-auto px-4 py-5 text-center">
@@ -287,8 +366,11 @@
               </div>
             </div>
 
-            <div class="w-full h-2 bg-white rounded-full mt-3 mb-5 overflow-hidden">
-              <div class="progress-bar h-full rounded-full ${colors.bar}" style="width: ${progress}%"></div>
+            <div class="flex items-center gap-3 mt-3 mb-5">
+              <div class="flex-1 h-2 bg-white rounded-full overflow-hidden">
+                <div class="progress-bar h-full rounded-full ${colors.bar}" style="width: ${progress}%"></div>
+              </div>
+              ${resetBtnHTML}
             </div>
 
             ${dailyHTML}
@@ -307,6 +389,11 @@
         </main>
       `;
     }
+
+    // Close modal on overlay click
+    document.getElementById('modal-overlay').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
 
     render();
   </script>

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Homemaking Routine</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏡</text></svg>">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif; }
+    .fade-in { animation: fadeIn 0.25s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .pop-in { animation: popIn 0.35s ease-out; }
+    @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    .progress-bar { transition: width 0.4s ease-out; }
+    .task-btn { transition: background-color 0.15s, opacity 0.2s, box-shadow 0.15s; }
+    .tab-btn { transition: all 0.15s ease; }
+    .checkmark { transition: background-color 0.15s, border-color 0.15s; }
+    @media (max-width: 480px) {
+      .day-tabs { gap: 4px; }
+      .day-tabs button { padding: 6px 8px; font-size: 10px; }
+      .day-tabs button .tab-emoji { font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="min-h-screen bg-gradient-to-br from-rose-50 via-white to-sky-50"></div>
+
+  <script>
+    const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+    const dailyTasks = [
+      { label: 'Make bed', emoji: '🛏️' },
+      { label: 'Kitchen sink & counters', emoji: '🧽' },
+      { label: '15-min tidy-up', emoji: '⏱️' },
+      { label: 'Run & empty dishwasher', emoji: '🍽️' },
+      { label: 'Evening reset', emoji: '🌙' },
+    ];
+
+    const schedule = {
+      Sunday: {
+        emoji: '🌿', label: 'Back Patio & Catch-Up', color: 'green',
+        tasks: [
+          { label: 'Sweep back patio', emoji: '🧹' },
+          { label: 'Wipe patio furniture', emoji: '🪑' },
+          { label: 'Water & tend plants', emoji: '🌱' },
+          { label: 'Tidy outdoor space', emoji: '🏡' },
+          { label: 'Catch up on missed tasks', emoji: '📝' },
+          { label: 'Review upcoming week', emoji: '📅' },
+        ],
+        includeDaily: true,
+      },
+      Monday: {
+        emoji: '✨', label: 'Kitchen/Dining & Living Room', color: 'rose',
+        tasks: [
+          { label: 'Deep clean counters & stove', emoji: '🔥' },
+          { label: 'Wipe dining table & chairs', emoji: '🪑' },
+          { label: 'Sweep & mop kitchen floor', emoji: '🧹' },
+          { label: 'Vacuum living room', emoji: '🫧' },
+          { label: 'Dust living room surfaces', emoji: '✨' },
+          { label: 'Fluff pillows & tidy décor', emoji: '🛋️' },
+        ],
+        includeDaily: true,
+      },
+      Tuesday: {
+        emoji: '🎨', label: 'Craft Space & Front Entrance', color: 'amber',
+        tasks: [
+          { label: 'Organize craft supplies & table', emoji: '✂️' },
+          { label: 'Put away finished projects', emoji: '📦' },
+          { label: 'Sweep & mop entrance/hallway', emoji: '🚪' },
+          { label: 'Wipe surfaces & light switches', emoji: '💡' },
+          { label: 'Organize shoes, coats & bags', emoji: '👟' },
+          { label: 'Clean front door & mat', emoji: '🏡' },
+        ],
+        includeDaily: true,
+      },
+      Wednesday: {
+        emoji: '🌸', label: 'Mid-Week Rest & Reset', color: 'purple',
+        tasks: [
+          { label: 'Quick surface wipe-down', emoji: '✨' },
+          { label: 'Prep snacks or freezer meals', emoji: '🥗' },
+          { label: 'Mid-week fridge check', emoji: '🧊' },
+          { label: 'Refresh flowers or candles', emoji: '🕯️' },
+          { label: 'Rest & recharge', emoji: '🧘' },
+        ],
+        includeDaily: true,
+      },
+      Thursday: {
+        emoji: '🛏️', label: 'Master Bedroom & Bath/Closet', color: 'teal',
+        tasks: [
+          { label: 'Change bed linens', emoji: '🛏️' },
+          { label: 'Dust bedroom surfaces', emoji: '✨' },
+          { label: 'Vacuum bedroom floor', emoji: '🧹' },
+          { label: 'Scrub sink & toilet', emoji: '🚽' },
+          { label: 'Clean shower/tub', emoji: '🚿' },
+          { label: 'Mop bathroom floor', emoji: '🧽' },
+          { label: 'Quick closet organize', emoji: '👗' },
+        ],
+        includeDaily: true,
+      },
+      Friday: {
+        emoji: '📚', label: 'Home Office & Prayer Room', color: 'indigo',
+        tasks: [
+          { label: 'Clear & organize desk', emoji: '🗂️' },
+          { label: 'File papers & shred junk', emoji: '📄' },
+          { label: 'Dust & vacuum office', emoji: '💻' },
+          { label: 'Tidy prayer room', emoji: '🕯️' },
+          { label: 'Vacuum walking space', emoji: '🧹' },
+          { label: 'Wipe surfaces & freshen up', emoji: '🌿' },
+        ],
+        includeDaily: true,
+      },
+      Saturday: {
+        emoji: '🧺', label: 'Laundry & Meal Planning', color: 'sky',
+        tasks: [
+          { label: 'Menu plan for the week', emoji: '📋' },
+          { label: 'Online grocery shopping', emoji: '🛒' },
+          { label: 'Sort all laundry', emoji: '👕' },
+          { label: 'Wash all loads', emoji: '🫧' },
+          { label: 'Dry everything', emoji: '☀️' },
+          { label: 'Fold & hang', emoji: '👚' },
+          { label: 'Put it all away', emoji: '🗄️' },
+          { label: 'Wipe down machines', emoji: '✨' },
+          { label: 'Clean lint trap', emoji: '🧹' },
+        ],
+        includeDaily: false,
+      },
+    };
+
+    const colorMap = {
+      purple: {
+        bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700',
+        accent: 'bg-purple-500', tab: 'bg-purple-500 text-white', bar: 'bg-purple-400',
+        accentHex: '#a855f7',
+      },
+      rose: {
+        bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-700',
+        accent: 'bg-rose-500', tab: 'bg-rose-500 text-white', bar: 'bg-rose-400',
+        accentHex: '#f43f5e',
+      },
+      amber: {
+        bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700',
+        accent: 'bg-amber-500', tab: 'bg-amber-500 text-white', bar: 'bg-amber-400',
+        accentHex: '#f59e0b',
+      },
+      sky: {
+        bg: 'bg-sky-50', border: 'border-sky-200', text: 'text-sky-700',
+        accent: 'bg-sky-500', tab: 'bg-sky-500 text-white', bar: 'bg-sky-400',
+        accentHex: '#0ea5e9',
+      },
+      teal: {
+        bg: 'bg-teal-50', border: 'border-teal-200', text: 'text-teal-700',
+        accent: 'bg-teal-500', tab: 'bg-teal-500 text-white', bar: 'bg-teal-400',
+        accentHex: '#14b8a6',
+      },
+      indigo: {
+        bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-700',
+        accent: 'bg-indigo-500', tab: 'bg-indigo-500 text-white', bar: 'bg-indigo-400',
+        accentHex: '#6366f1',
+      },
+      green: {
+        bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700',
+        accent: 'bg-green-500', tab: 'bg-green-500 text-white', bar: 'bg-green-400',
+        accentHex: '#22c55e',
+      },
+    };
+
+    let selectedDay = DAYS[new Date().getDay()];
+    const today = selectedDay;
+    let checked = {};
+
+    function getAllTasks(day) {
+      const data = schedule[day];
+      return data.includeDaily ? [...dailyTasks, ...data.tasks] : [...data.tasks];
+    }
+
+    function toggleCheck(day, index) {
+      const key = `${day}-${index}`;
+      checked[key] = !checked[key];
+      render();
+    }
+
+    function selectDay(day) {
+      selectedDay = day;
+      render();
+    }
+
+    function createCheckSVG() {
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+    }
+
+    function renderTask(task, index, colors, day) {
+      const isChecked = checked[`${day}-${index}`];
+      const checkCircle = isChecked
+        ? `<span class="checkmark flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center ${colors.accent}">${createCheckSVG()}</span>`
+        : `<span class="checkmark flex-shrink-0 w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center"></span>`;
+
+      const textClass = isChecked ? 'line-through text-gray-400' : 'text-gray-700';
+      const btnClass = isChecked ? 'bg-white/40 opacity-50' : 'bg-white hover:shadow-sm';
+
+      return `
+        <button onclick="toggleCheck('${day}', ${index})"
+          class="task-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left ${btnClass}">
+          ${checkCircle}
+          <span class="text-base leading-none">${task.emoji}</span>
+          <span class="text-sm ${textClass}">${task.label}</span>
+        </button>
+      `;
+    }
+
+    function render() {
+      const dayData = schedule[selectedDay];
+      const colors = colorMap[dayData.color];
+      const allTasks = getAllTasks(selectedDay);
+      const completedCount = allTasks.filter((_, i) => checked[`${selectedDay}-${i}`]).length;
+      const progress = allTasks.length > 0 ? (completedCount / allTasks.length) * 100 : 0;
+
+      let tabsHTML = DAYS.map(day => {
+        const sel = day === selectedDay;
+        const isTod = day === today;
+        const dc = colorMap[schedule[day].color];
+        const cls = sel
+          ? `${dc.tab} shadow-md scale-105`
+          : 'bg-white text-gray-500 hover:bg-gray-50 border border-gray-100';
+        const todayLabel = isTod
+          ? `<span class="block text-xs ${sel ? 'opacity-75' : 'text-rose-400'}">today</span>`
+          : '';
+        return `
+          <button onclick="selectDay('${day}')"
+            class="tab-btn flex-shrink-0 px-3 py-2 rounded-xl text-xs font-semibold ${cls}">
+            <span class="tab-emoji block text-base leading-none mb-1">${schedule[day].emoji}</span>
+            ${day.slice(0, 3)}
+            ${todayLabel}
+          </button>
+        `;
+      }).join('');
+
+      let dailyHTML = '';
+      if (dayData.includeDaily) {
+        const dailyItems = dailyTasks.map((task, i) => renderTask(task, i, colors, selectedDay)).join('');
+        dailyHTML = `
+          <div class="mb-4">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">🌅 Daily Basics</p>
+            <div class="space-y-1.5">${dailyItems}</div>
+          </div>
+        `;
+      }
+
+      const zoneItems = dayData.tasks.map((task, idx) => {
+        const i = dayData.includeDaily ? dailyTasks.length + idx : idx;
+        return renderTask(task, i, colors, selectedDay);
+      }).join('');
+
+      const celebrationHTML = progress === 100 ? `
+        <div class="pop-in mt-4 text-center py-3 bg-white rounded-xl">
+          <span class="text-3xl">🎉</span>
+          <p class="text-sm font-bold ${colors.text} mt-1">All done! You're amazing!</p>
+        </div>
+      ` : '';
+
+      document.getElementById('app').innerHTML = `
+        <header class="bg-white shadow-sm border-b border-rose-100">
+          <div class="max-w-2xl mx-auto px-4 py-5 text-center">
+            <div class="text-3xl mb-1">🏡</div>
+            <h1 class="text-2xl font-bold text-gray-800 tracking-tight">My Homemaking Routine</h1>
+            <p class="text-sm text-gray-400 mt-1">one day at a time 🌷</p>
+          </div>
+        </header>
+
+        <main class="max-w-2xl mx-auto px-4 py-6 space-y-5">
+          <nav class="day-tabs flex gap-1.5 overflow-x-auto pb-2">
+            ${tabsHTML}
+          </nav>
+
+          <section class="fade-in rounded-2xl border-2 ${colors.border} ${colors.bg} p-5">
+            <div class="flex items-center justify-between mb-1">
+              <div>
+                <h2 class="text-lg font-bold ${colors.text}">
+                  ${dayData.emoji} ${selectedDay}
+                </h2>
+                <p class="text-sm text-gray-500 font-medium">${dayData.label}</p>
+              </div>
+              <div class="text-right">
+                <span class="text-2xl font-bold ${colors.text}">${completedCount}</span>
+                <span class="text-gray-400 text-sm"> / ${allTasks.length}</span>
+              </div>
+            </div>
+
+            <div class="w-full h-2 bg-white rounded-full mt-3 mb-5 overflow-hidden">
+              <div class="progress-bar h-full rounded-full ${colors.bar}" style="width: ${progress}%"></div>
+            </div>
+
+            ${dailyHTML}
+
+            <div>
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                🏠 ${dayData.label}
+              </p>
+              <div class="space-y-1.5">${zoneItems}</div>
+            </div>
+
+            ${celebrationHTML}
+          </section>
+
+          <footer class="text-center pb-8 text-xs text-gray-300">🌷 You're doing a great job 🌷</footer>
+        </main>
+      `;
+    }
+
+    render();
+  </script>
+</body>
+</html>

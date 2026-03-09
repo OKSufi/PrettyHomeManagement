@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Homemaking Routine</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏡</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23fff1f2'/><rect x='20' y='52' width='60' height='40' rx='4' fill='%23fda4af'/><polygon points='10,54 50,13 90,54' fill='%23f43f5e'/><rect x='40' y='67' width='20' height='25' rx='3' fill='%23be185d'/><circle cx='57.5' cy='79.5' r='2' fill='%23fda4af'/><rect x='24' y='58' width='16' height='13' rx='2' fill='white' opacity='0.9'/><rect x='60' y='58' width='16' height='13' rx='2' fill='white' opacity='0.9'/><line x1='32' y1='58' x2='32' y2='71' stroke='%23fda4af' stroke-width='1.5'/><line x1='24' y1='64.5' x2='40' y2='64.5' stroke='%23fda4af' stroke-width='1.5'/><line x1='68' y1='58' x2='68' y2='71' stroke='%23fda4af' stroke-width='1.5'/><line x1='60' y1='64.5' x2='76' y2='64.5' stroke='%23fda4af' stroke-width='1.5'/><rect x='45' y='7' width='10' height='9' rx='1' fill='%23be185d'/></svg>">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
@@ -42,7 +42,7 @@
 
     const schedule = {
       Sunday: {
-        emoji: '🌿', label: 'Back Patio & Catch-Up', color: 'green',
+        emoji: '🌿', label: 'Back Patio, Pantry & Catch-Up', color: 'green',
         tasks: [
           { label: 'Sweep back patio', emoji: '🧹' },
           { label: 'Wipe patio furniture', emoji: '🪑' },
@@ -50,11 +50,16 @@
           { label: 'Tidy outdoor space', emoji: '🏡' },
           { label: 'Catch up on missed tasks', emoji: '📝' },
           { label: 'Review upcoming week', emoji: '📅' },
+          { label: 'Back Pantry', emoji: '🫙', isHeader: true },
+          { label: 'Wipe back pantry shelves', emoji: '🫙' },
+          { label: 'Organize storage & bulk items', emoji: '📦' },
+          { label: 'Check expiry dates', emoji: '🗓️' },
+          { label: 'Sweep back pantry floor', emoji: '🧹' },
         ],
         includeDaily: true,
       },
       Monday: {
-        emoji: '✨', label: 'Kitchen/Dining & Living Room', color: 'rose',
+        emoji: '✨', label: 'Kitchen/Dining, Living Room & Front Pantry', color: 'rose',
         tasks: [
           { label: 'Deep clean counters & stove', emoji: '🔥' },
           { label: 'Wipe dining table & chairs', emoji: '🪑' },
@@ -62,6 +67,11 @@
           { label: 'Vacuum living room', emoji: '🫧' },
           { label: 'Dust living room surfaces', emoji: '✨' },
           { label: 'Fluff pillows & tidy décor', emoji: '🛋️' },
+          { label: 'Front Pantry', emoji: '🫙', isHeader: true },
+          { label: 'Wipe front pantry shelves', emoji: '🫙' },
+          { label: 'Organize & group pantry items', emoji: '📦' },
+          { label: 'Check expiry dates', emoji: '🗓️' },
+          { label: 'Sweep front pantry floor', emoji: '🧹' },
         ],
         includeDaily: true,
       },
@@ -161,11 +171,11 @@
       },
     };
 
-    /* ---- Week key: ISO week start (Monday), so the whole week shares one key ---- */
+    /* ---- Week key: ISO week start (Monday) ---- */
     function getWeekKey() {
       const now = new Date();
-      const day = now.getDay(); // 0=Sun
-      const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Monday
+      const day = now.getDay();
+      const diff = now.getDate() - day + (day === 0 ? -6 : 1);
       const monday = new Date(now.getFullYear(), now.getMonth(), diff);
       return `${monday.getFullYear()}-${String(monday.getMonth()+1).padStart(2,'0')}-${String(monday.getDate()).padStart(2,'0')}`;
     }
@@ -177,7 +187,6 @@
         if (!raw) return {};
         const data = JSON.parse(raw);
         if (data.weekKey !== getWeekKey()) {
-          // New week — start fresh
           localStorage.removeItem(STORAGE_KEY);
           return {};
         }
@@ -193,9 +202,7 @@
           weekKey: getWeekKey(),
           checked: checked,
         }));
-      } catch (e) {
-        // silently fail
-      }
+      } catch (e) {}
     }
 
     let selectedDay = DAYS[new Date().getDay()];
@@ -208,6 +215,8 @@
     }
 
     function toggleCheck(day, index) {
+      const tasks = getAllTasks(day);
+      if (tasks[index] && tasks[index].isHeader) return;
       const key = `${day}-${index}`;
       checked[key] = !checked[key];
       saveChecked();
@@ -244,8 +253,8 @@
 
     function resetDay(day) {
       const allTasks = getAllTasks(day);
-      allTasks.forEach((_, i) => {
-        delete checked[`${day}-${i}`];
+      allTasks.forEach((task, i) => {
+        if (!task.isHeader) delete checked[`${day}-${i}`];
       });
       saveChecked();
       closeModal();
@@ -263,6 +272,17 @@
     }
 
     function renderTask(task, index, colors, day) {
+      /* Section header — non-interactive divider */
+      if (task.isHeader) {
+        return `
+          <div class="flex items-center gap-2 pt-3 pb-0.5">
+            <span class="text-sm">${task.emoji}</span>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">${task.label}</p>
+            <div class="flex-1 h-px bg-gray-200"></div>
+          </div>
+        `;
+      }
+
       const isChecked = checked[`${day}-${index}`];
       const checkCircle = isChecked
         ? `<span class="checkmark flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center ${colors.accent}">${createCheckSVG()}</span>`
@@ -285,8 +305,17 @@
       const dayData = schedule[selectedDay];
       const colors = colorMap[dayData.color];
       const allTasks = getAllTasks(selectedDay);
-      const completedCount = allTasks.filter((_, i) => checked[`${selectedDay}-${i}`]).length;
-      const progress = allTasks.length > 0 ? (completedCount / allTasks.length) * 100 : 0;
+
+      /* Progress excludes isHeader items */
+      let completedCount = 0;
+      let totalCheckable = 0;
+      allTasks.forEach((task, i) => {
+        if (!task.isHeader) {
+          totalCheckable++;
+          if (checked[`${selectedDay}-${i}`]) completedCount++;
+        }
+      });
+      const progress = totalCheckable > 0 ? (completedCount / totalCheckable) * 100 : 0;
 
       let tabsHTML = DAYS.map(day => {
         const sel = day === selectedDay;
@@ -362,7 +391,7 @@
               </div>
               <div class="text-right">
                 <span class="text-2xl font-bold ${colors.text}">${completedCount}</span>
-                <span class="text-gray-400 text-sm"> / ${allTasks.length}</span>
+                <span class="text-gray-400 text-sm"> / ${totalCheckable}</span>
               </div>
             </div>
 
@@ -390,7 +419,6 @@
       `;
     }
 
-    // Close modal on overlay click
     document.getElementById('modal-overlay').addEventListener('click', function(e) {
       if (e.target === this) closeModal();
     });

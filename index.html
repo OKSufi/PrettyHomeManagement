@@ -30,7 +30,9 @@
 
   <script>
     const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     const STORAGE_KEY = 'homemaking-routine';
+    const MONTHLY_STORAGE_KEY = 'homemaking-monthly';
 
     const dailyTasks = [
       { label: 'Make bed', emoji: '🛏️' },
@@ -42,7 +44,7 @@
 
     const schedule = {
       Sunday: {
-        emoji: '🌿', label: 'Back Patio, Pantry & Catch-Up', color: 'green',
+        emoji: '🌿', label: 'Back Patio & Catch-Up', color: 'green',
         tasks: [
           { label: 'Sweep back patio', emoji: '🧹' },
           { label: 'Wipe patio furniture', emoji: '🪑' },
@@ -50,16 +52,11 @@
           { label: 'Tidy outdoor space', emoji: '🏡' },
           { label: 'Catch up on missed tasks', emoji: '📝' },
           { label: 'Review upcoming week', emoji: '📅' },
-          { label: 'Back Pantry', emoji: '🫙', isHeader: true },
-          { label: 'Wipe back pantry shelves', emoji: '🫙' },
-          { label: 'Organize storage & bulk items', emoji: '📦' },
-          { label: 'Check expiry dates', emoji: '🗓️' },
-          { label: 'Sweep back pantry floor', emoji: '🧹' },
         ],
         includeDaily: true,
       },
       Monday: {
-        emoji: '✨', label: 'Kitchen/Dining, Living Room & Front Pantry', color: 'rose',
+        emoji: '✨', label: 'Kitchen/Dining & Living Room', color: 'rose',
         tasks: [
           { label: 'Deep clean counters & stove', emoji: '🔥' },
           { label: 'Wipe dining table & chairs', emoji: '🪑' },
@@ -67,11 +64,6 @@
           { label: 'Vacuum living room', emoji: '🫧' },
           { label: 'Dust living room surfaces', emoji: '✨' },
           { label: 'Fluff pillows & tidy décor', emoji: '🛋️' },
-          { label: 'Front Pantry', emoji: '🫙', isHeader: true },
-          { label: 'Wipe front pantry shelves', emoji: '🫙' },
-          { label: 'Organize & group pantry items', emoji: '📦' },
-          { label: 'Check expiry dates', emoji: '🗓️' },
-          { label: 'Sweep front pantry floor', emoji: '🧹' },
         ],
         includeDaily: true,
       },
@@ -140,38 +132,31 @@
       },
     };
 
+    /* ---- Monthly checklist ---- */
+    const monthlyChecklist = [
+      { label: 'Front Pantry', emoji: '🫙', isHeader: true },
+      { label: 'Wipe front pantry shelves', emoji: '🫙' },
+      { label: 'Organize & group pantry items', emoji: '📦' },
+      { label: 'Check expiry dates', emoji: '🗓️' },
+      { label: 'Sweep front pantry floor', emoji: '🧹' },
+      { label: 'Back Pantry', emoji: '🫙', isHeader: true },
+      { label: 'Wipe back pantry shelves', emoji: '🫙' },
+      { label: 'Organize storage & bulk items', emoji: '📦' },
+      { label: 'Check expiry dates', emoji: '🗓️' },
+      { label: 'Sweep back pantry floor', emoji: '🧹' },
+    ];
+
     const colorMap = {
-      purple: {
-        bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700',
-        accent: 'bg-purple-500', tab: 'bg-purple-500 text-white', bar: 'bg-purple-400',
-      },
-      rose: {
-        bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-700',
-        accent: 'bg-rose-500', tab: 'bg-rose-500 text-white', bar: 'bg-rose-400',
-      },
-      amber: {
-        bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700',
-        accent: 'bg-amber-500', tab: 'bg-amber-500 text-white', bar: 'bg-amber-400',
-      },
-      sky: {
-        bg: 'bg-sky-50', border: 'border-sky-200', text: 'text-sky-700',
-        accent: 'bg-sky-500', tab: 'bg-sky-500 text-white', bar: 'bg-sky-400',
-      },
-      teal: {
-        bg: 'bg-teal-50', border: 'border-teal-200', text: 'text-teal-700',
-        accent: 'bg-teal-500', tab: 'bg-teal-500 text-white', bar: 'bg-teal-400',
-      },
-      indigo: {
-        bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-700',
-        accent: 'bg-indigo-500', tab: 'bg-indigo-500 text-white', bar: 'bg-indigo-400',
-      },
-      green: {
-        bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700',
-        accent: 'bg-green-500', tab: 'bg-green-500 text-white', bar: 'bg-green-400',
-      },
+      purple:  { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700',  accent: 'bg-purple-500',  tab: 'bg-purple-500 text-white',  bar: 'bg-purple-400'  },
+      rose:    { bg: 'bg-rose-50',   border: 'border-rose-200',   text: 'text-rose-700',    accent: 'bg-rose-500',    tab: 'bg-rose-500 text-white',    bar: 'bg-rose-400'    },
+      amber:   { bg: 'bg-amber-50',  border: 'border-amber-200',  text: 'text-amber-700',   accent: 'bg-amber-500',   tab: 'bg-amber-500 text-white',   bar: 'bg-amber-400'   },
+      sky:     { bg: 'bg-sky-50',    border: 'border-sky-200',    text: 'text-sky-700',     accent: 'bg-sky-500',     tab: 'bg-sky-500 text-white',     bar: 'bg-sky-400'     },
+      teal:    { bg: 'bg-teal-50',   border: 'border-teal-200',   text: 'text-teal-700',    accent: 'bg-teal-500',    tab: 'bg-teal-500 text-white',    bar: 'bg-teal-400'    },
+      indigo:  { bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-700',  accent: 'bg-indigo-500',  tab: 'bg-indigo-500 text-white',  bar: 'bg-indigo-400'  },
+      green:   { bg: 'bg-green-50',  border: 'border-green-200',  text: 'text-green-700',   accent: 'bg-green-500',   tab: 'bg-green-500 text-white',   bar: 'bg-green-400'   },
     };
 
-    /* ---- Week key: ISO week start (Monday) ---- */
+    /* ---- Keys ---- */
     function getWeekKey() {
       const now = new Date();
       const day = now.getDay();
@@ -180,51 +165,74 @@
       return `${monday.getFullYear()}-${String(monday.getMonth()+1).padStart(2,'0')}-${String(monday.getDate()).padStart(2,'0')}`;
     }
 
-    /* ---- Persistence ---- */
+    function getMonthKey() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    }
+
+    /* ---- Weekly persistence ---- */
     function loadChecked() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return {};
         const data = JSON.parse(raw);
-        if (data.weekKey !== getWeekKey()) {
-          localStorage.removeItem(STORAGE_KEY);
-          return {};
-        }
+        if (data.weekKey !== getWeekKey()) { localStorage.removeItem(STORAGE_KEY); return {}; }
         return data.checked || {};
-      } catch (e) {
-        return {};
-      }
+      } catch (e) { return {}; }
     }
 
     function saveChecked() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({
-          weekKey: getWeekKey(),
-          checked: checked,
-        }));
-      } catch (e) {}
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ weekKey: getWeekKey(), checked })); } catch (e) {}
     }
 
+    /* ---- Monthly persistence ---- */
+    function loadMonthlyChecked() {
+      try {
+        const raw = localStorage.getItem(MONTHLY_STORAGE_KEY);
+        if (!raw) return {};
+        const data = JSON.parse(raw);
+        if (data.monthKey !== getMonthKey()) { localStorage.removeItem(MONTHLY_STORAGE_KEY); return {}; }
+        return data.checked || {};
+      } catch (e) { return {}; }
+    }
+
+    function saveMonthlyChecked() {
+      try { localStorage.setItem(MONTHLY_STORAGE_KEY, JSON.stringify({ monthKey: getMonthKey(), checked: monthlyChecked })); } catch (e) {}
+    }
+
+    /* ---- State ---- */
     let selectedDay = DAYS[new Date().getDay()];
     const today = selectedDay;
     let checked = loadChecked();
+    let monthlyChecked = loadMonthlyChecked();
+    let viewMode = 'weekly'; // 'weekly' | 'monthly'
 
+    /* ---- Helpers ---- */
     function getAllTasks(day) {
       const data = schedule[day];
       return data.includeDaily ? [...dailyTasks, ...data.tasks] : [...data.tasks];
     }
 
+    function createCheckSVG() {
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+    }
+
+    /* ---- Actions ---- */
+    function setView(mode) { viewMode = mode; render(); }
+    function selectDay(day) { selectedDay = day; render(); }
+
     function toggleCheck(day, index) {
       const tasks = getAllTasks(day);
       if (tasks[index] && tasks[index].isHeader) return;
-      const key = `${day}-${index}`;
-      checked[key] = !checked[key];
+      checked[`${day}-${index}`] = !checked[`${day}-${index}`];
       saveChecked();
       render();
     }
 
-    function selectDay(day) {
-      selectedDay = day;
+    function toggleMonthlyCheck(index) {
+      if (monthlyChecklist[index] && monthlyChecklist[index].isHeader) return;
+      monthlyChecked[`monthly-${index}`] = !monthlyChecked[`monthly-${index}`];
+      saveMonthlyChecked();
       render();
     }
 
@@ -236,27 +244,39 @@
           <p class="text-lg font-bold text-gray-800 mb-1">Reset ${day}?</p>
           <p class="text-sm text-gray-500 mb-5">This will uncheck all tasks for ${day}.</p>
           <div class="flex gap-3">
-            <button onclick="closeModal()"
-              class="flex-1 py-2 rounded-xl border border-gray-200 text-sm font-semibold text-gray-500 hover:bg-gray-50">
-              Cancel
-            </button>
-            <button onclick="resetDay('${day}')"
-              class="flex-1 py-2 rounded-xl text-sm font-semibold text-white ${colors.accent} hover:opacity-90">
-              Reset
-            </button>
+            <button onclick="closeModal()" class="flex-1 py-2 rounded-xl border border-gray-200 text-sm font-semibold text-gray-500 hover:bg-gray-50">Cancel</button>
+            <button onclick="resetDay('${day}')" class="flex-1 py-2 rounded-xl text-sm font-semibold text-white ${colors.accent} hover:opacity-90">Reset</button>
           </div>
-        </div>
-      `;
+        </div>`;
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+    }
+
+    function confirmResetMonthly() {
+      const overlay = document.getElementById('modal-overlay');
+      overlay.innerHTML = `
+        <div class="bg-white rounded-2xl shadow-xl p-6 max-w-xs w-full text-center pop-in">
+          <p class="text-lg font-bold text-gray-800 mb-1">Reset Monthly List?</p>
+          <p class="text-sm text-gray-500 mb-5">This will uncheck all monthly tasks.</p>
+          <div class="flex gap-3">
+            <button onclick="closeModal()" class="flex-1 py-2 rounded-xl border border-gray-200 text-sm font-semibold text-gray-500 hover:bg-gray-50">Cancel</button>
+            <button onclick="resetMonthly()" class="flex-1 py-2 rounded-xl text-sm font-semibold text-white bg-pink-500 hover:opacity-90">Reset</button>
+          </div>
+        </div>`;
       overlay.classList.remove('hidden');
       overlay.classList.add('flex');
     }
 
     function resetDay(day) {
-      const allTasks = getAllTasks(day);
-      allTasks.forEach((task, i) => {
-        if (!task.isHeader) delete checked[`${day}-${i}`];
-      });
+      getAllTasks(day).forEach((task, i) => { if (!task.isHeader) delete checked[`${day}-${i}`]; });
       saveChecked();
+      closeModal();
+      render();
+    }
+
+    function resetMonthly() {
+      monthlyChecklist.forEach((task, i) => { if (!task.isHeader) delete monthlyChecked[`monthly-${i}`]; });
+      saveMonthlyChecked();
       closeModal();
       render();
     }
@@ -267,48 +287,140 @@
       overlay.classList.remove('flex');
     }
 
-    function createCheckSVG() {
-      return `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+    /* ---- Render helpers ---- */
+    function sectionHeaderHTML(task) {
+      return `
+        <div class="flex items-center gap-2 pt-3 pb-0.5">
+          <span class="text-sm">${task.emoji}</span>
+          <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">${task.label}</p>
+          <div class="flex-1 h-px bg-gray-200"></div>
+        </div>`;
     }
 
     function renderTask(task, index, colors, day) {
-      /* Section header — non-interactive divider */
-      if (task.isHeader) {
-        return `
-          <div class="flex items-center gap-2 pt-3 pb-0.5">
-            <span class="text-sm">${task.emoji}</span>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">${task.label}</p>
-            <div class="flex-1 h-px bg-gray-200"></div>
-          </div>
-        `;
-      }
-
+      if (task.isHeader) return sectionHeaderHTML(task);
       const isChecked = checked[`${day}-${index}`];
       const checkCircle = isChecked
         ? `<span class="checkmark flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center ${colors.accent}">${createCheckSVG()}</span>`
-        : `<span class="checkmark flex-shrink-0 w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center"></span>`;
-
-      const textClass = isChecked ? 'line-through text-gray-400' : 'text-gray-700';
-      const btnClass = isChecked ? 'bg-white/40 opacity-50' : 'bg-white hover:shadow-sm';
-
+        : `<span class="checkmark flex-shrink-0 w-5 h-5 rounded-full border-2 border-gray-300"></span>`;
       return `
         <button onclick="toggleCheck('${day}', ${index})"
-          class="task-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left ${btnClass}">
+          class="task-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left ${isChecked ? 'bg-white/40 opacity-50' : 'bg-white hover:shadow-sm'}">
           ${checkCircle}
           <span class="text-base leading-none">${task.emoji}</span>
-          <span class="text-sm ${textClass}">${task.label}</span>
-        </button>
-      `;
+          <span class="text-sm ${isChecked ? 'line-through text-gray-400' : 'text-gray-700'}">${task.label}</span>
+        </button>`;
     }
 
+    function renderMonthlyTask(task, index) {
+      if (task.isHeader) return sectionHeaderHTML(task);
+      const isChecked = monthlyChecked[`monthly-${index}`];
+      const checkCircle = isChecked
+        ? `<span class="checkmark flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center bg-pink-500">${createCheckSVG()}</span>`
+        : `<span class="checkmark flex-shrink-0 w-5 h-5 rounded-full border-2 border-gray-300"></span>`;
+      return `
+        <button onclick="toggleMonthlyCheck(${index})"
+          class="task-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left ${isChecked ? 'bg-white/40 opacity-50' : 'bg-white hover:shadow-sm'}">
+          ${checkCircle}
+          <span class="text-base leading-none">${task.emoji}</span>
+          <span class="text-sm ${isChecked ? 'line-through text-gray-400' : 'text-gray-700'}">${task.label}</span>
+        </button>`;
+    }
+
+    function viewToggleHTML() {
+      return `
+        <div class="flex justify-center">
+          <div class="flex bg-white border border-gray-100 rounded-2xl p-1 shadow-sm gap-1">
+            <button onclick="setView('weekly')"
+              class="tab-btn px-5 py-2 rounded-xl text-sm font-semibold transition-all ${viewMode === 'weekly' ? 'bg-rose-500 text-white shadow-sm' : 'text-gray-400 hover:text-gray-600'}">
+              📅 Weekly
+            </button>
+            <button onclick="setView('monthly')"
+              class="tab-btn px-5 py-2 rounded-xl text-sm font-semibold transition-all ${viewMode === 'monthly' ? 'bg-pink-500 text-white shadow-sm' : 'text-gray-400 hover:text-gray-600'}">
+              🗓️ Monthly
+            </button>
+          </div>
+        </div>`;
+    }
+
+    function headerHTML() {
+      return `
+        <header class="bg-white shadow-sm border-b border-rose-100">
+          <div class="max-w-2xl mx-auto px-4 py-5 text-center">
+            <div class="text-3xl mb-1">🏡</div>
+            <h1 class="text-2xl font-bold text-gray-800 tracking-tight">My Homemaking Routine</h1>
+            <p class="text-sm text-gray-400 mt-1">one day at a time 🌷</p>
+          </div>
+        </header>`;
+    }
+
+    /* ---- Main render dispatcher ---- */
     function render() {
+      viewMode === 'monthly' ? renderMonthly() : renderWeekly();
+    }
+
+    /* ---- Monthly view ---- */
+    function renderMonthly() {
+      const now = new Date();
+      const monthName = MONTHS[now.getMonth()];
+      const year = now.getFullYear();
+
+      let completedCount = 0, totalCheckable = 0;
+      monthlyChecklist.forEach((task, i) => {
+        if (!task.isHeader) {
+          totalCheckable++;
+          if (monthlyChecked[`monthly-${i}`]) completedCount++;
+        }
+      });
+      const progress = totalCheckable > 0 ? (completedCount / totalCheckable) * 100 : 0;
+
+      const taskItems = monthlyChecklist.map((task, i) => renderMonthlyTask(task, i)).join('');
+      const celebrationHTML = progress === 100 ? `
+        <div class="pop-in mt-4 text-center py-3 bg-white rounded-xl">
+          <span class="text-3xl">🎉</span>
+          <p class="text-sm font-bold text-pink-700 mt-1">All done! You're amazing!</p>
+        </div>` : '';
+      const resetBtnHTML = completedCount > 0 ? `
+        <button onclick="confirmResetMonthly()"
+          class="text-xs text-gray-400 hover:text-gray-600 transition-colors font-medium">
+          ↺ Reset month
+        </button>` : '';
+
+      document.getElementById('app').innerHTML = `
+        ${headerHTML()}
+        <main class="max-w-2xl mx-auto px-4 py-6 space-y-5">
+          ${viewToggleHTML()}
+          <section class="fade-in rounded-2xl border-2 border-pink-200 bg-pink-50 p-5">
+            <div class="flex items-center justify-between mb-1">
+              <div>
+                <h2 class="text-lg font-bold text-pink-700">🗓️ ${monthName} ${year}</h2>
+                <p class="text-sm text-gray-500 font-medium">Monthly Checklist</p>
+              </div>
+              <div class="text-right">
+                <span class="text-2xl font-bold text-pink-700">${completedCount}</span>
+                <span class="text-gray-400 text-sm"> / ${totalCheckable}</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 mt-3 mb-5">
+              <div class="flex-1 h-2 bg-white rounded-full overflow-hidden">
+                <div class="progress-bar h-full rounded-full bg-pink-400" style="width: ${progress}%"></div>
+              </div>
+              ${resetBtnHTML}
+            </div>
+            <div class="space-y-1.5">${taskItems}</div>
+            ${celebrationHTML}
+          </section>
+          <footer class="text-center pb-8 text-xs text-gray-300">🌷 You're doing a great job 🌷</footer>
+        </main>`;
+    }
+
+    /* ---- Weekly view ---- */
+    function renderWeekly() {
       const dayData = schedule[selectedDay];
       const colors = colorMap[dayData.color];
       const allTasks = getAllTasks(selectedDay);
 
-      /* Progress excludes isHeader items */
-      let completedCount = 0;
-      let totalCheckable = 0;
+      let completedCount = 0, totalCheckable = 0;
       allTasks.forEach((task, i) => {
         if (!task.isHeader) {
           totalCheckable++;
@@ -317,24 +429,17 @@
       });
       const progress = totalCheckable > 0 ? (completedCount / totalCheckable) * 100 : 0;
 
-      let tabsHTML = DAYS.map(day => {
+      const tabsHTML = DAYS.map(day => {
         const sel = day === selectedDay;
         const isTod = day === today;
         const dc = colorMap[schedule[day].color];
-        const cls = sel
-          ? `${dc.tab} shadow-md scale-105`
-          : 'bg-white text-gray-500 hover:bg-gray-50 border border-gray-100';
-        const todayLabel = isTod
-          ? `<span class="block text-xs ${sel ? 'opacity-75' : 'text-rose-400'}">today</span>`
-          : '';
+        const cls = sel ? `${dc.tab} shadow-md scale-105` : 'bg-white text-gray-500 hover:bg-gray-50 border border-gray-100';
+        const todayLabel = isTod ? `<span class="block text-xs ${sel ? 'opacity-75' : 'text-rose-400'}">today</span>` : '';
         return `
-          <button onclick="selectDay('${day}')"
-            class="tab-btn flex-shrink-0 px-3 py-2 rounded-xl text-xs font-semibold ${cls}">
+          <button onclick="selectDay('${day}')" class="tab-btn flex-shrink-0 px-3 py-2 rounded-xl text-xs font-semibold ${cls}">
             <span class="tab-emoji block text-base leading-none mb-1">${schedule[day].emoji}</span>
-            ${day.slice(0, 3)}
-            ${todayLabel}
-          </button>
-        `;
+            ${day.slice(0, 3)}${todayLabel}
+          </button>`;
       }).join('');
 
       let dailyHTML = '';
@@ -344,8 +449,7 @@
           <div class="mb-4">
             <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">🌅 Daily Basics</p>
             <div class="space-y-1.5">${dailyItems}</div>
-          </div>
-        `;
+          </div>`;
       }
 
       const zoneItems = dayData.tasks.map((task, idx) => {
@@ -357,36 +461,22 @@
         <div class="pop-in mt-4 text-center py-3 bg-white rounded-xl">
           <span class="text-3xl">🎉</span>
           <p class="text-sm font-bold ${colors.text} mt-1">All done! You're amazing!</p>
-        </div>
-      ` : '';
-
+        </div>` : '';
       const resetBtnHTML = completedCount > 0 ? `
         <button onclick="confirmResetDay('${selectedDay}')"
           class="text-xs text-gray-400 hover:text-gray-600 transition-colors font-medium">
           ↺ Reset day
-        </button>
-      ` : '';
+        </button>` : '';
 
       document.getElementById('app').innerHTML = `
-        <header class="bg-white shadow-sm border-b border-rose-100">
-          <div class="max-w-2xl mx-auto px-4 py-5 text-center">
-            <div class="text-3xl mb-1">🏡</div>
-            <h1 class="text-2xl font-bold text-gray-800 tracking-tight">My Homemaking Routine</h1>
-            <p class="text-sm text-gray-400 mt-1">one day at a time 🌷</p>
-          </div>
-        </header>
-
+        ${headerHTML()}
         <main class="max-w-2xl mx-auto px-4 py-6 space-y-5">
-          <nav class="day-tabs flex gap-1.5 overflow-x-auto pb-2">
-            ${tabsHTML}
-          </nav>
-
+          ${viewToggleHTML()}
+          <nav class="day-tabs flex gap-1.5 overflow-x-auto pb-2">${tabsHTML}</nav>
           <section class="fade-in rounded-2xl border-2 ${colors.border} ${colors.bg} p-5">
             <div class="flex items-center justify-between mb-1">
               <div>
-                <h2 class="text-lg font-bold ${colors.text}">
-                  ${dayData.emoji} ${selectedDay}
-                </h2>
+                <h2 class="text-lg font-bold ${colors.text}">${dayData.emoji} ${selectedDay}</h2>
                 <p class="text-sm text-gray-500 font-medium">${dayData.label}</p>
               </div>
               <div class="text-right">
@@ -394,29 +484,21 @@
                 <span class="text-gray-400 text-sm"> / ${totalCheckable}</span>
               </div>
             </div>
-
             <div class="flex items-center gap-3 mt-3 mb-5">
               <div class="flex-1 h-2 bg-white rounded-full overflow-hidden">
                 <div class="progress-bar h-full rounded-full ${colors.bar}" style="width: ${progress}%"></div>
               </div>
               ${resetBtnHTML}
             </div>
-
             ${dailyHTML}
-
             <div>
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                🏠 ${dayData.label}
-              </p>
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">🏠 ${dayData.label}</p>
               <div class="space-y-1.5">${zoneItems}</div>
             </div>
-
             ${celebrationHTML}
           </section>
-
           <footer class="text-center pb-8 text-xs text-gray-300">🌷 You're doing a great job 🌷</footer>
-        </main>
-      `;
+        </main>`;
     }
 
     document.getElementById('modal-overlay').addEventListener('click', function(e) {
